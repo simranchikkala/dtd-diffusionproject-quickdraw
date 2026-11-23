@@ -1,0 +1,18 @@
+# Keep the image small: only the code, model and requirements are needed.
+data/
+results/
+.git/
+.github/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+env/
+.vscode/
+.idea/
+*.npy
+*.npz
+.DS_Store
+Thumbs.db
+desktop.ini
