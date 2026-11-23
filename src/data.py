@@ -98,7 +98,7 @@ def preprocess_image(img, threshold=0.1, content_size=24):
     arr = np.asarray(img.convert("L"), dtype=np.float32) / 255.0
 
     # Quick, Draw! is white-on-black; most uploads are black-on-white.
-    if arr.mean() > 0.5:
+    if arr.mean() > .5:
         arr = 1.0 - arr
 
     # Crop to the drawing itself.
