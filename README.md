@@ -134,27 +134,38 @@ _To be added: link to the deployed app._
 
 ## Results
 
-_To be filled in from `results/metrics.csv` after the final training run._
+_
+Results on 300 held-out test drawings (150 stars, 150 moons), with noise level 0.1 added to the 8×8 input. Diffusion uses guidance 1 and 50 sampling steps.
 
-| Method | MSE (noise 0.1) ↓ | SSIM (noise 0.1) ↑ |
-|---|---|---|
-| Bicubic | | |
-| Linear regression | | |
-| CNN | | |
-| Diffusion | | |
+| Method | MSE ↓ | SSIM ↑ | Shape accuracy ↑ |
+|---|---|---|---|
+| Bicubic | 0.117 | 0.208 | 0.51 |
+| Linear regression | **0.064** | 0.212 | 0.51 |
+| CNN | 0.066 | **0.221** | 0.52 |
+| Diffusion | 0.128 | 0.170 | **0.77** |
+| Real drawings (ceiling) | 0 | 1 | 0.98 |
 
-MSE measures average pixel error and tends to reward safe, blurry outputs. SSIM measures structural similarity and is fairer to sharp outputs. We therefore expect the diffusion model to look the sharpest even where its MSE is not the lowest.
+**Shape accuracy by category:** the baselines recognise 0–1% of stars and 100% of moons, because their blurry outputs all look like moons. Diffusion recognises 82% of stars and 71% of moons.
 
+**Effect of noise on diffusion shape accuracy:** 0.83 (no noise), 0.77 (noise 0.1), 0.70 (noise 0.2).
+
+**Effect of guidance strength** (diffusion, noise 0.1):
+
+| Guidance | MSE ↓ | SSIM ↑ | Shape accuracy ↑ |
+|---|---|---|---|
+| **1 (used)** | **0.128** | **0.170** | **0.77** |
+| 1.5 | 0.157 | 0.135 | 0.63 |
+| 2 | 0.207 | 0.087 | 0.49 |
+| 3 | 0.281 | 0.033 | 0.50 |
+
+### What the results show
+
+- The linear regression and CNN baselines score best on the pixel-based metrics (MSE and SSIM), because blurry outputs "hedge" between possible stroke positions. But they never produce a recognisable star.
+- The diffusion model produces sharp doodles of the right shape far more often (77% vs about 51%). Its MSE is higher because a sharp stroke drawn slightly out of place is penalised more than a blur.
+- Stronger classifier-free guidance made every metric worse: the 8×8 hint is so small and noisy that guidance amplified noise rather than shape.
+- Diffusion produces *a* plausible doodle rather than *the* exact original: the same input can give different results from different random starts (`results/samples.png`).
 ---
 
 ## References
 
-1. J. Sohl-Dickstein, E. Weiss, N. Maheswaranathan, and S. Ganguli, "Deep Unsupervised Learning using Nonequilibrium Thermodynamics," *ICML*, 2015.
-2. J. Ho, A. Jain, and P. Abbeel, "Denoising Diffusion Probabilistic Models," *NeurIPS*, 2020.
-3. J. Song, C. Meng, and S. Ermon, "Denoising Diffusion Implicit Models," *ICLR*, 2021.
-4. C. Saharia et al., "Image Super-Resolution via Iterative Refinement" (SR3), *IEEE TPAMI*, 2022.
-5. O. Ronneberger, P. Fischer, and T. Brox, "U-Net: Convolutional Networks for Biomedical Image Segmentation," *MICCAI*, 2015.
-6. Y. LeCun, L. Bottou, Y. Bengio, and P. Haffner, "Gradient-Based Learning Applied to Document Recognition," *Proceedings of the IEEE*, 1998.
-7. Z. Wang, A. C. Bovik, H. R. Sheikh, and E. P. Simoncelli, "Image Quality Assessment: From Error Visibility to Structural Similarity," *IEEE TIP*, 2004.
-8. Google Creative Lab, "The Quick, Draw! Dataset," https://github.com/googlecreativelab/quickdraw-dataset
-9. Git, Docker and Streamlit documentation: https://git-scm.com/doc, https://docs.docker.com/, https://docs.streamlit.io/
+1. Google Creative Lab, "The Quick, Draw! Dataset," https://github.com/googlecreativelab/quickdraw-dataset
