@@ -1,3 +1,6 @@
+# CPU-only PyTorch (~200 MB instead of ~2.5 GB with GPU libraries).
+# Keeps installs fast and fits free hosting such as Streamlit Community Cloud.
+--extra-index-url https://download.pytorch.org/whl/cpu
 numpy
 matplotlib
 Pillow
