@@ -177,7 +177,9 @@ Each run can be followed in the repository's **Actions** tab, and the badge at t
 
 ## Live app
 
-_To be added: link to the deployed app._
+**Try it here: https://dtd-diffusionproject-quickdraw-bxqwp8vesuwxhdpw6y7t5n.streamlit.app/**
+
+Draw a star or a moon (or upload a picture, or pick an example) and watch the diffusion model rebuild it from a noisy 8×8 version. The app also shows the denoising steps, compares the output with the bicubic, linear regression and CNN baselines, and generates several samples from the same input. It is hosted for free on Streamlit Community Cloud. If nobody has used it for a few days it goes to sleep, and the first visitor waits about 30 seconds while it wakes up.
 
 ---
 
