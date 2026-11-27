@@ -1,0 +1,118 @@
+<!doctype html>
+<!--
+  A tiny drawing canvas for Streamlit, written without any build step.
+
+  It speaks Streamlit's custom-component protocol directly (postMessage):
+    componentReady -> tells Streamlit the iframe has loaded
+    render         <- Streamlit sends the arguments (canvas size, pen width)
+    setComponentValue -> sends the drawing back to Python as a PNG data URL
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; font-family: "Source Sans Pro", system-ui, sans-serif; background: transparent; }
+  .wrap { display: inline-flex; flex-direction: column; gap: 8px; }
+  canvas {
+    background: #fff; border: 2px solid #d0d3da; border-radius: 10px;
+    cursor: crosshair; touch-action: none; display: block;
+  }
+  .buttons { display: flex; gap: 8px; }
+  button {
+    flex: 1; padding: 6px 10px; font-size: 14px; border-radius: 8px; cursor: pointer;
+    border: 1px solid #d0d3da; background: #f6f7f9; color: #31333f;
+  }
+  button:hover { border-color: #ff4b4b; color: #ff4b4b; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <canvas id="c"></canvas>
+  <div class="buttons">
+    <button id="undo">↶ Undo</button>
+    <button id="clear">✕ Clear</button>
+  </div>
+</div>
+<script>
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  let size = 280, pen = 16;
+  let strokes = [];          // list of strokes, each a list of [x, y] points
+  let current = null;
+  let initialised = false;
+
+  function send(type, data) {
+    window.parent.postMessage(Object.assign({ isStreamlitMessage: true, type }, data), "*");
+  }
+
+  function redraw() {
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, size, size);
+    ctx.strokeStyle = "#000";
+    ctx.fillStyle = "#000";
+    ctx.lineWidth = pen;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    for (const s of strokes) {
+      if (s.length === 1) {                      // a single tap draws a dot
+        ctx.beginPath();
+        ctx.arc(s[0][0], s[0][1], pen / 2, 0, 2 * Math.PI);
+        ctx.fill();
+        continue;
+      }
+      ctx.beginPath();
+      ctx.moveTo(s[0][0], s[0][1]);
+      for (const p of s.slice(1)) ctx.lineTo(p[0], p[1]);
+      ctx.stroke();
+    }
+  }
+
+  function publish() {
+    // Empty canvas -> null, so Python knows nothing has been drawn yet.
+    const value = strokes.length ? canvas.toDataURL("image/png") : null;
+    send("streamlit:setComponentValue", { value, dataType: "json" });
+  }
+
+  function point(e) {
+    const r = canvas.getBoundingClientRect();
+    return [(e.clientX - r.left) * size / r.width, (e.clientY - r.top) * size / r.height];
+  }
+
+  canvas.addEventListener("pointerdown", e => {
+    canvas.setPointerCapture(e.pointerId);
+    current = [point(e)];
+    strokes.push(current);
+    redraw();
+  });
+  canvas.addEventListener("pointermove", e => {
+    if (!current) return;
+    current.push(point(e));
+    redraw();
+  });
+  function endStroke() {
+    if (!current) return;
+    current = null;
+    publish();                                 // send once per stroke, not per pixel
+  }
+  canvas.addEventListener("pointerup", endStroke);
+  canvas.addEventListener("pointercancel", endStroke);
+
+  document.getElementById("undo").onclick = () => { strokes.pop(); redraw(); publish(); };
+  document.getElementById("clear").onclick = () => { strokes = []; redraw(); publish(); };
+
+  window.addEventListener("message", e => {
+    if (e.data.type !== "streamlit:render" || initialised) return;
+    const args = e.data.args || {};
+    size = args.size || size;
+    pen = args.pen || pen;
+    canvas.width = canvas.height = size;
+    canvas.style.width = canvas.style.height = size + "px";
+    initialised = true;
+    redraw();
+    send("streamlit:setFrameHeight", { height: document.body.scrollHeight + 4 });
+  });
+
+  send("streamlit:componentReady", { apiVersion: 1 });
+</script>
+</body>
+</html>
