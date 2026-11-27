@@ -7,7 +7,7 @@ This project has been completed and compiled by the following students:
 | Name | Student ID | Main responsibilities |
 |---|---|---|
 | Aditi Raj | 1012491 | App Building & Integration with Model |
-| Joe | _ID_ | App Building & Report |
+| Joe | 1012340| App Building & Report |
 | Rakshita | 1012250 | App Building & Report |
 | Simran Srinivasan Chikkala | 1012380 | Model Building, Training & Docker Implementation  |
 
