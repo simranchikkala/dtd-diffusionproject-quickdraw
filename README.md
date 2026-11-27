@@ -76,7 +76,8 @@ This project contains the following files, each with a specific function:
 | `src/diffusion.py` | The noise schedule, training loss, classifier-free guidance and step-by-step image generation. |
 | `src/metrics.py` | MSE and SSIM evaluation metrics. |
 | `requirements.txt` | Python packages needed to run the project. |
-| `app.py` | Streamlit web app (currently a simple placeholder; the full app is in progress). |
+| `app.py` | Streamlit web app: draw, upload or pick a star or moon doodle and see the diffusion output, the denoising steps, the baselines and several samples. |
+| `components/draw_canvas/` | The drawing canvas used by the app (plain HTML and JavaScript, no build step). |
 | `tests/` | Automated tests (pytest), with settings in `pytest.ini`. |
 | `Dockerfile` | Packages the app and its environment. |
 | `.dockerignore` | Keeps the data, results and git history out of the Docker image. |
@@ -141,7 +142,7 @@ Then open http://localhost:8501 in a browser.
 python3 -m pytest
 ```
 
-The 38 tests in `tests/test_diffusion.py` run in a few seconds and don't need the dataset. They check:
+The 38 tests in `tests/test_diffusion.py` (plus 5 end-to-end app tests in `tests/test_app.py`) run in a few seconds and don't need the dataset. They check:
 
 - **Image sizes and noise:** 28×28 → 8×8 → 28×28, noise follows the brief's formula, the same seed gives the same noise, and the train/test split is repeatable with no overlap.
 - **Models:** linear regression, CNN, U-Net and classifier all produce the expected output shapes, and saving then loading a model gives identical weights.
@@ -176,7 +177,9 @@ Each run can be followed in the repository's **Actions** tab, and the badge at t
 
 ## Live app
 
-_To be added: link to the deployed app._
+**Try it here: https://dtd-diffusionproject-quickdraw-bxqwp8vesuwxhdpw6y7t5n.streamlit.app/**
+
+Draw a star or a moon (or upload a picture, or pick an example) and watch the diffusion model rebuild it from a noisy 8×8 version. The app also shows the denoising steps, compares the output with the bicubic, linear regression and CNN baselines, and generates several samples from the same input. It is hosted for free on Streamlit Community Cloud. If nobody has used it for a few days it goes to sleep, and the first visitor waits about 30 seconds while it wakes up.
 
 ---
 
